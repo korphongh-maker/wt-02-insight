@@ -59,10 +59,11 @@ export function groupDataForBoxPlot(data, dataKey, granularity) {
     let max = values[n - 1];
     // Ensure visible range when all values are identical
     if (min === max) {
-      min = min - 0.5;
-      max = max + 0.5;
-      q1 = min + 0.25;
-      q3 = max - 0.25;
+      const buf = Math.abs(min) * 0.05 || 0.01;
+      min = min - buf;
+      max = max + buf;
+      q1 = min + buf * 0.5;
+      q3 = max - buf * 0.5;
     }
     const mean = values.reduce((s, v) => s + v, 0) / n;
     return { label, min, q1, median, q3, max, mean, count: n };
