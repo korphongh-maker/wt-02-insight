@@ -1,0 +1,178 @@
+// Chart configurations for ทุกกะ and ทุกวัน tables
+
+export const SHIFTLY_CHARTS = [
+  {
+    id: 'tank1_temp',
+    title: 'Tank 1 - อุณหภูมิ (45-55°C)',
+    dataKey: 'เช็คและบันทึกอุณหภูมิถังที่  1  ค่าคอนโทรล ( 45 - 55°C  )',
+    targets: [45, 55],
+    unit: '°C',
+  },
+  {
+    id: 'tank3_temp',
+    title: 'Tank 3 - อุณหภูมิ (45-55°C)',
+    dataKey: 'เช็คและบันทึกอุณหภูมิถังที่  3  ค่าคอนโทรล ( 45 - 55°C  )',
+    targets: [45, 55],
+    unit: '°C',
+  },
+  {
+    id: 'tank4_temp',
+    title: 'Tank 4 - อุณหภูมิ (45-55°C)',
+    dataKey: 'เช็คและบันทึกอุณหภูมิถังที่  4  ค่าคอนโทรล ( 45 - 55°C  )',
+    targets: [45, 55],
+    unit: '°C',
+  },
+  {
+    id: 'tank5_temp',
+    title: 'Tank 5 - อุณหภูมิ (90-130°C)',
+    dataKey: 'เช็คและบันทึกอุณหภูมิถังที่  5  ค่าคอนโทรล ( 90 - 130°C  )',
+    targets: [90, 130],
+    unit: '°C',
+  },
+  {
+    id: 'tank6_temp',
+    title: 'Tank 6 - อุณหภูมิ (100-130°C)',
+    dataKey: 'เช็คและบันทึกอุณหภูมิถังที่  6  ค่าคอนโทรล ( 100 - 130°C  )',
+    targets: [100, 130],
+    unit: '°C',
+  },
+  {
+    id: 'di_water',
+    title: 'ค่าความต้านทานน้ำ DI (≥6.0 MOhms)',
+    dataKey: 'เช็คค่าความต้านทานของน้ำ DI ค่ามากกว่า > =  6.0 MOhms.',
+    targets: [6],
+    unit: 'MOhms',
+  },
+  {
+    id: 'heater_temp',
+    title: 'Heater Temp Setup (120-140°C)',
+    dataKey: 'Heater Temp Setup 120 - 140°C',
+    targets: [120, 140],
+    unit: '°C',
+  },
+];
+
+export const DAILY_CHARTS = [
+  {
+    id: 'tank1_filter_in',
+    title: 'Tank 1 Dip - แรงดันไส้กรองด้านเข้า (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านเข้า tank 1 dip ( 0.01 - 0.30 Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank1_filter_out',
+    title: 'Tank 1 Dip - แรงดันไส้กรองด้านออก (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านออก tank 1 dip ( 0.01 - 0.30 Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank2_filter_in',
+    title: 'Tank 2 Shower - แรงดันไส้กรองด้านเข้า (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านเข้า tank2 shower ( 0.01-0.30 Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank2_filter_out',
+    title: 'Tank 2 Shower - แรงดันไส้กรองด้านออก (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านออก tank 2 shower ( 0.01-0.30 Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank2_flow',
+    title: 'Tank 2 - อัตราการไหลของน้ำ (≥18 L/min)',
+    dataKey: 'เช็คอัตราการไหลของน้ำ ( มากกว่า 18 ลิตร / นาที )',
+    targets: [18],
+    unit: 'L/min',
+  },
+  {
+    id: 'tank3_filter_in',
+    title: 'Tank 3 Dip - แรงดันไส้กรองด้านเข้า (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านเข้า tank 3 dip ( 0.01 - 0.30 Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank3_filter_out',
+    title: 'Tank 3 Dip - แรงดันไส้กรองด้านออก (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านออก tank 3 dip ( 0.01 - 0.30 Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank4_flow_circ',
+    title: 'Tank 4 - อัตราการไหลหมุนเวียน (≥60 L/min)',
+    dataKey: 'เช็คระดับน้ำในถัง / อัตราการไหลหมุนเวียน ( อย่างน้อย 60 L/MIN )',
+    targets: [60],
+    unit: 'L/min',
+  },
+  {
+    id: 'tank4_filter_in',
+    title: 'Tank 4 Dip - แรงดันไส้กรองด้านเข้า (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านเข้า tank 4 dip ( 0.01 - 0.30  Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank4_filter_out',
+    title: 'Tank 4 Dip - แรงดันไส้กรองด้านออก (0.01-0.30 Mpa)',
+    dataKey: 'เช็คแรงดันไส้กรองด้านออก tank 4 dip ( 0.01 - 0.30  Mpa )',
+    targets: [0.01, 0.30],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank4_flow_in',
+    title: 'Tank 4 - อัตราน้ำไหลเข้า (≥18 L/min)',
+    dataKey: 'เช็คอัตราน้ำไหลเข้าถังที่ 4  ( อย่างน้อย 18  ลิตร / นาที )',
+    targets: [18],
+    unit: 'L/min',
+  },
+  {
+    id: 'tank5_air',
+    title: 'Tank 5 Air Blow - ลมร้อน (83-120 Mpa)',
+    dataKey: 'เช็คการหมุนเวียนของลมร้อนคอนโทรลมากกว่า > 83 -120 Mpa.',
+    targets: [83, 120],
+    unit: 'Mpa',
+  },
+  {
+    id: 'tank6_vacuum',
+    title: 'Tank 6 - แรงดันสุญญากาศ (Control ≤0.60, Spec ≤0.80 Kpa)',
+    dataKey: 'บันทึกแรงดันสุญญากาศถัง 6 ให้เช็คค่าต่ำสุด SPEC < = 0.80 Kpa CONTROL < = 0.60 Kpa.',
+    targets: [0.6, 0.8],
+    unit: 'Kpa',
+  },
+  {
+    id: 'cold_water_temp',
+    title: 'อุณหภูมิน้ำเย็น (8-15°C)',
+    dataKey: 'เช็คและบันทึกอุณหภูมิน้ำเย็นคอนโทรล ( 8 - 15 ºC ) ไม่เกิน 15ºC',
+    targets: [8, 15],
+    unit: '°C',
+  },
+  {
+    id: 'cold_water_pressure',
+    title: 'แรงดันน้ำเย็น CWS (kg/cm²)',
+    dataKey: 'เช็คแรงดันของน้ำเย็นด้านเข้า  ( CWS ) , เช็คการเปิดน้ำ (kg/cm²)',
+    targets: [],
+    unit: 'kg/cm²',
+  },
+  {
+    id: 'di_pressure',
+    title: 'แรงดันน้ำ DI (Kg/cm²)',
+    dataKey: 'บันทึกแรงดันน้ำ DI ( Kg / cm² )',
+    targets: [],
+    unit: 'Kg/cm²',
+  },
+  {
+    id: 'air_pressure',
+    title: 'แรงดันลม (0.4-6.5 Mpa)',
+    dataKey: 'เช็คแรงดันของลมที่ใช้( 0.4 - 6.5 Mpa.)',
+    targets: [0.4, 6.5],
+    unit: 'Mpa',
+  },
+];
+
+export const DATE_KEY_SHIFTLY = 'วันที่ตรวจ';
+export const DATE_KEY_DAILY = 'วันที่ตรวจ';
