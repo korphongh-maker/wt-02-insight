@@ -28,23 +28,29 @@ export function filterData(data, granularity, selectedYear, selectedMonth) {
 // Group data for box plot
 export function groupDataForBoxPlot(data, dataKey, granularity) {
   const groups = {};
+  const keyOrder = {};
   data.forEach(row => {
     const val = parseFloat(row[dataKey]);
     if (isNaN(val)) return;
     let key;
+    let sortKey;
     if (granularity === 'day') {
-      key = moment(row._day).format('DD');
+      key = moment(row._day).format('DD/MM');
+      sortKey = row._day;
     } else if (granularity === 'month') {
-      key = moment(row._month + '-01').format('MMM');
+      key = moment(row._month + '-01').format('MMM YY');
+      sortKey = row._month;
     } else {
       key = row._year;
+      sortKey = row._year;
     }
-    if (!groups[key]) groups[key] = [];
+    if (!groups[key]) { groups[key] = []; keyOrder[key] = sortKey; }
     groups[key].push(val);
   });
 
-  return Object.entries(groups).map(([label, values]) => {
-    values.sort((a, b) => a - b);
+  const sorted = Object.keys(groups).sort((a, b) => keyOrder[a].localeCompare(keyOrder[b]));
+  return sorted.map(label => {
+    const values = [...groups[label]].sort((a, b) => a - b);
     const n = values.length;
     const q1 = percentile(values, 25);
     const median = percentile(values, 50);
@@ -58,24 +64,38 @@ export function groupDataForBoxPlot(data, dataKey, granularity) {
 
 // Group data for line chart
 export function groupDataForLine(data, dataKey, granularity) {
-  const result = [];
-  data.forEach(row => {
-    const val = parseFloat(row[dataKey]);
-    if (isNaN(val)) return;
-    let label;
-    if (granularity === 'day') {
-      label = moment(row[dateKeyFromRow(row)]).format('DD MMM HH:mm');
-    } else if (granularity === 'month') {
-      label = moment(row[dateKeyFromRow(row)]).format('DD MMM');
-    } else {
-      label = moment(row[dateKeyFromRow(row)]).format('MMM YYYY');
-    }
-    result.push({
-      label,
-      value: val,
-      date: row._date?.valueOf() || 0,
+  if (granularity === 'month' || granularity === 'year') {
+    // Group by month and average
+    const groups = {};
+    const keyOrder = {};
+    data.forEach(row => {
+      const val = parseFloat(row[dataKey]);
+      if (isNaN(val)) return;
+      const key = row._month; // always group by month
+      const label = moment(row._month + '-01').format('MMM YY');
+      if (!groups[key]) { groups[key] = { label, values: [], sortKey: key }; }
+      groups[key].values.push(val);
     });
-  });
+    return Object.values(groups)
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+      .map(g => ({
+        label: g.label,
+        value: g.values.reduce((s, v) => s + v, 0) / g.values.length,
+        date: moment(g.sortKey + '-01').valueOf(),
+      }));
+  }
+  // day view: each record as a point
+  const result = data
+    .map(row => {
+      const val = parseFloat(row[dataKey]);
+      if (isNaN(val)) return null;
+      return {
+        label: moment(row._day).format('DD/MM'),
+        value: val,
+        date: row._date?.valueOf() || 0,
+      };
+    })
+    .filter(Boolean);
   return result.sort((a, b) => a.date - b.date);
 }
 
