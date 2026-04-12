@@ -1,75 +1,83 @@
 import { useMemo } from 'react';
 import {
-  ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ResponsiveContainer
+  ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip,
+  ReferenceLine, ResponsiveContainer, Customized
 } from 'recharts';
 
-// Custom shape that draws the full box plot using SVG
-function BoxShape(props) {
-  const { x, y, width, height, payload, yAxis } = props;
-  if (!payload || !yAxis) return null;
+function BoxPlotLayer({ xAxisMap, yAxisMap, data }) {
+  const xAxis = xAxisMap && xAxisMap[0];
+  const yAxis = yAxisMap && yAxisMap[0];
+  if (!xAxis || !yAxis) return null;
 
-  const { min, q1, median, q3, max, isSingle } = payload;
-  const { scale } = yAxis;
-  if (!scale) return null;
+  const xScale = xAxis.scale;
+  const yScale = yAxis.scale;
+  const bandwidth = xScale.bandwidth ? xScale.bandwidth() : 20;
 
-  const toY = val => scale(val);
-
-  if (isSingle) {
-    const lineY = toY(median);
-    return (
-      <line
-        x1={x}
-        y1={lineY}
-        x2={x + width}
-        y2={lineY}
-        stroke="hsl(var(--primary))"
-        strokeWidth={3}
-        strokeLinecap="round"
-      />
-    );
-  }
-
-  const yMin = toY(min);
-  const yQ1 = toY(q1);
-  const yMedian = toY(median);
-  const yQ3 = toY(q3);
-  const yMax = toY(max);
-  const cx = x + width / 2;
-  const whiskerW = width * 0.3;
   const primaryColor = 'hsl(217, 91%, 50%)';
   const mutedColor = 'hsl(220, 10%, 46%)';
 
   return (
     <g>
-      {/* Lower whisker line */}
-      <line x1={cx} y1={yMin} x2={cx} y2={yQ1} stroke={mutedColor} strokeWidth={1.5} />
-      {/* Upper whisker line */}
-      <line x1={cx} y1={yQ3} x2={cx} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
-      {/* Min cap */}
-      <line x1={cx - whiskerW} y1={yMin} x2={cx + whiskerW} y2={yMin} stroke={mutedColor} strokeWidth={1.5} />
-      {/* Max cap */}
-      <line x1={cx - whiskerW} y1={yMax} x2={cx + whiskerW} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
-      {/* IQR box */}
-      <rect
-        x={x + width * 0.1}
-        y={yQ3}
-        width={width * 0.8}
-        height={Math.max(1, yQ1 - yQ3)}
-        fill={primaryColor}
-        fillOpacity={0.35}
-        stroke={primaryColor}
-        strokeWidth={1.5}
-      />
-      {/* Median line */}
-      <line
-        x1={x + width * 0.1}
-        y1={yMedian}
-        x2={x + width * 0.9}
-        y2={yMedian}
-        stroke={primaryColor}
-        strokeWidth={2.5}
-      />
+      {data.map((d, i) => {
+        const cx = xScale(d.label) + bandwidth / 2;
+        const boxW = bandwidth * 0.6;
+        const whiskerW = bandwidth * 0.25;
+
+        if (d.isSingle) {
+          const lineY = yScale(d.median);
+          return (
+            <line
+              key={i}
+              x1={cx - boxW / 2}
+              y1={lineY}
+              x2={cx + boxW / 2}
+              y2={lineY}
+              stroke={primaryColor}
+              strokeWidth={3}
+              strokeLinecap="round"
+            />
+          );
+        }
+
+        const yMin = yScale(d.min);
+        const yQ1 = yScale(d.q1);
+        const yMedian = yScale(d.median);
+        const yQ3 = yScale(d.q3);
+        const yMax = yScale(d.max);
+
+        return (
+          <g key={i}>
+            {/* Lower whisker */}
+            <line x1={cx} y1={yMin} x2={cx} y2={yQ1} stroke={mutedColor} strokeWidth={1.5} />
+            {/* Upper whisker */}
+            <line x1={cx} y1={yQ3} x2={cx} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
+            {/* Min cap */}
+            <line x1={cx - whiskerW} y1={yMin} x2={cx + whiskerW} y2={yMin} stroke={mutedColor} strokeWidth={1.5} />
+            {/* Max cap */}
+            <line x1={cx - whiskerW} y1={yMax} x2={cx + whiskerW} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
+            {/* IQR box */}
+            <rect
+              x={cx - boxW / 2}
+              y={yQ3}
+              width={boxW}
+              height={Math.max(1, yQ1 - yQ3)}
+              fill={primaryColor}
+              fillOpacity={0.3}
+              stroke={primaryColor}
+              strokeWidth={1.5}
+            />
+            {/* Median line */}
+            <line
+              x1={cx - boxW / 2}
+              y1={yMedian}
+              x2={cx + boxW / 2}
+              y2={yMedian}
+              stroke={primaryColor}
+              strokeWidth={2.5}
+            />
+          </g>
+        );
+      })}
     </g>
   );
 }
@@ -95,10 +103,8 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
     ];
   }, [data, targets]);
 
-  // chartData just needs a dummy value so Bar renders per entry
   const chartData = data.map(d => ({
     label: d.label,
-    _dummy: 0,
     isSingle: d.min === d.max,
     min: d.min, q1: d.q1, median: d.median,
     q3: d.q3, max: d.max, mean: d.mean, count: d.count,
@@ -106,7 +112,9 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
-    const d = payload[0]?.payload;
+    // Find the matching data point by label
+    const label = payload[0]?.payload?.label;
+    const d = chartData.find(r => r.label === label);
     if (!d) return null;
     const fmt = v => (typeof v === 'number' ? parseFloat(v.toFixed(4)).toString() : '-');
     return (
@@ -133,7 +141,7 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
         <YAxis domain={yDomain} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
 
-        <Bar dataKey="_dummy" shape={<BoxShape />} legendType="none" isAnimationActive={false} />
+        <Customized component={(props) => <BoxPlotLayer {...props} data={chartData} />} />
 
         {targets.map((t, i) => (
           <ReferenceLine
