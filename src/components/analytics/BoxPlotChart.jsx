@@ -1,8 +1,23 @@
 import { useMemo } from 'react';
 import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ResponsiveContainer
+  ReferenceLine, ResponsiveContainer, Cell
 } from 'recharts';
+
+function SingleLineShape(props) {
+  const { x, y, width } = props;
+  return (
+    <line
+      x1={x}
+      y1={y}
+      x2={x + width}
+      y2={y}
+      stroke="hsl(var(--primary))"
+      strokeWidth={3}
+      strokeLinecap="round"
+    />
+  );
+}
 
 export default function BoxPlotChart({ data, targets = [], unit = '' }) {
   if (!data || data.length === 0) {
@@ -18,28 +33,36 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
     const minVal = Math.min(...allVals);
     const maxVal = Math.max(...allVals);
     const range = maxVal - minVal || Math.abs(maxVal) * 0.1 || 1;
-    const padding = range * 0.15;
+    const padding = range * 0.2;
     return [
-      parseFloat((minVal - padding).toFixed(4)),
-      parseFloat((maxVal + padding).toFixed(4)),
+      parseFloat((minVal - padding).toFixed(6)),
+      parseFloat((maxVal + padding).toFixed(6)),
     ];
   }, [data, targets]);
 
-  const chartData = data.map(d => ({
-    label: d.label,
-    base: d.min,
-    whiskerLow: Math.max(0, d.q1 - d.min),
-    q1ToMedian: Math.max(0, d.median - d.q1),
-    medianToQ3: Math.max(0, d.q3 - d.median),
-    whiskerHigh: Math.max(0, d.max - d.q3),
-    median: d.median,
-    mean: d.mean,
-    min: d.min,
-    max: d.max,
-    q1: d.q1,
-    q3: d.q3,
-    count: d.count,
-  }));
+  const chartData = data.map(d => {
+    const isSingle = d.min === d.max;
+    return {
+      label: d.label,
+      isSingle,
+      // box plot stacks (only used when not single)
+      base: isSingle ? null : d.min,
+      whiskerLow: isSingle ? null : Math.max(0, d.q1 - d.min),
+      q1ToMedian: isSingle ? null : Math.max(0, d.median - d.q1),
+      medianToQ3: isSingle ? null : Math.max(0, d.q3 - d.median),
+      whiskerHigh: isSingle ? null : Math.max(0, d.max - d.q3),
+      // single point marker value
+      singleVal: isSingle ? d.median : null,
+      // raw stats for tooltip
+      median: d.median,
+      mean: d.mean,
+      min: d.min,
+      max: d.max,
+      q1: d.q1,
+      q3: d.q3,
+      count: d.count,
+    };
+  });
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
@@ -70,11 +93,15 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
         <YAxis domain={yDomain} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
         <Tooltip content={<CustomTooltip />} />
 
+        {/* Box plot bars */}
         <Bar dataKey="base" stackId="box" fill="transparent" legendType="none" />
         <Bar dataKey="whiskerLow" stackId="box" fill="hsl(var(--muted-foreground))" opacity={0.35} legendType="none" />
         <Bar dataKey="q1ToMedian" stackId="box" fill="hsl(var(--primary))" opacity={0.7} legendType="none" />
         <Bar dataKey="medianToQ3" stackId="box" fill="hsl(var(--primary))" opacity={0.45} legendType="none" />
         <Bar dataKey="whiskerHigh" stackId="box" fill="hsl(var(--muted-foreground))" opacity={0.35} legendType="none" />
+
+        {/* Single-value line marker */}
+        <Bar dataKey="singleVal" legendType="none" shape={<SingleLineShape />} />
 
         {targets.map((t, i) => (
           <ReferenceLine
