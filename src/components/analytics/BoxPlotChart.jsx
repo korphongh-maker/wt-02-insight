@@ -1,83 +1,67 @@
 import { useMemo } from 'react';
 import {
-  ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ResponsiveContainer, Customized
+  ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ReferenceLine, ResponsiveContainer, Cell
 } from 'recharts';
 
-function BoxPlotLayer({ xAxisMap, yAxisMap, data }) {
-  const xAxis = xAxisMap && xAxisMap[0];
-  const yAxis = yAxisMap && yAxisMap[0];
-  if (!xAxis || !yAxis) return null;
+// Custom shape receives x, y, width, height + all bar data via props
+// But we need to draw using actual data values, so we use a custom shape
+// that accesses the chart's yAxis scale through the background approach.
+// Instead, we pass the full domain info and compute positions manually.
 
-  const xScale = xAxis.scale;
-  const yScale = yAxis.scale;
-  const bandwidth = xScale.bandwidth ? xScale.bandwidth() : 20;
+function BoxShape(props) {
+  const { x, width, value, background, min, q1, median, q3, max, isSingle, yDomain, chartHeight } = props;
+  
+  if (min === undefined || !background) return null;
+
+  // Compute pixel y from value using domain + chart height
+  const domainMin = yDomain[0];
+  const domainMax = yDomain[1];
+  const totalH = background.height;
+  const topY = background.y;
+
+  const toY = (val) => topY + totalH - ((val - domainMin) / (domainMax - domainMin)) * totalH;
 
   const primaryColor = 'hsl(217, 91%, 50%)';
   const mutedColor = 'hsl(220, 10%, 46%)';
+  const cx = x + width / 2;
+  const boxW = width * 0.7;
+  const whiskerW = width * 0.3;
+
+  if (isSingle) {
+    const lineY = toY(median);
+    return (
+      <line
+        x1={cx - boxW / 2} y1={lineY}
+        x2={cx + boxW / 2} y2={lineY}
+        stroke={primaryColor} strokeWidth={3} strokeLinecap="round"
+      />
+    );
+  }
+
+  const yMin = toY(min);
+  const yQ1 = toY(q1);
+  const yMedian = toY(median);
+  const yQ3 = toY(q3);
+  const yMax = toY(max);
 
   return (
     <g>
-      {data.map((d, i) => {
-        const cx = xScale(d.label) + bandwidth / 2;
-        const boxW = bandwidth * 0.6;
-        const whiskerW = bandwidth * 0.25;
-
-        if (d.isSingle) {
-          const lineY = yScale(d.median);
-          return (
-            <line
-              key={i}
-              x1={cx - boxW / 2}
-              y1={lineY}
-              x2={cx + boxW / 2}
-              y2={lineY}
-              stroke={primaryColor}
-              strokeWidth={3}
-              strokeLinecap="round"
-            />
-          );
-        }
-
-        const yMin = yScale(d.min);
-        const yQ1 = yScale(d.q1);
-        const yMedian = yScale(d.median);
-        const yQ3 = yScale(d.q3);
-        const yMax = yScale(d.max);
-
-        return (
-          <g key={i}>
-            {/* Lower whisker */}
-            <line x1={cx} y1={yMin} x2={cx} y2={yQ1} stroke={mutedColor} strokeWidth={1.5} />
-            {/* Upper whisker */}
-            <line x1={cx} y1={yQ3} x2={cx} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
-            {/* Min cap */}
-            <line x1={cx - whiskerW} y1={yMin} x2={cx + whiskerW} y2={yMin} stroke={mutedColor} strokeWidth={1.5} />
-            {/* Max cap */}
-            <line x1={cx - whiskerW} y1={yMax} x2={cx + whiskerW} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
-            {/* IQR box */}
-            <rect
-              x={cx - boxW / 2}
-              y={yQ3}
-              width={boxW}
-              height={Math.max(1, yQ1 - yQ3)}
-              fill={primaryColor}
-              fillOpacity={0.3}
-              stroke={primaryColor}
-              strokeWidth={1.5}
-            />
-            {/* Median line */}
-            <line
-              x1={cx - boxW / 2}
-              y1={yMedian}
-              x2={cx + boxW / 2}
-              y2={yMedian}
-              stroke={primaryColor}
-              strokeWidth={2.5}
-            />
-          </g>
-        );
-      })}
+      <line x1={cx} y1={yMin} x2={cx} y2={yQ1} stroke={mutedColor} strokeWidth={1.5} />
+      <line x1={cx} y1={yQ3} x2={cx} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
+      <line x1={cx - whiskerW} y1={yMin} x2={cx + whiskerW} y2={yMin} stroke={mutedColor} strokeWidth={1.5} />
+      <line x1={cx - whiskerW} y1={yMax} x2={cx + whiskerW} y2={yMax} stroke={mutedColor} strokeWidth={1.5} />
+      <rect
+        x={cx - boxW / 2} y={yQ3}
+        width={boxW} height={Math.max(1, yQ1 - yQ3)}
+        fill={primaryColor} fillOpacity={0.3}
+        stroke={primaryColor} strokeWidth={1.5}
+      />
+      <line
+        x1={cx - boxW / 2} y1={yMedian}
+        x2={cx + boxW / 2} y2={yMedian}
+        stroke={primaryColor} strokeWidth={2.5}
+      />
     </g>
   );
 }
@@ -108,13 +92,13 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
     isSingle: d.min === d.max,
     min: d.min, q1: d.q1, median: d.median,
     q3: d.q3, max: d.max, mean: d.mean, count: d.count,
+    // dummy value in middle of range so bar registers for tooltip
+    _dummy: (d.min + d.max) / 2,
   }));
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
-    // Find the matching data point by label
-    const label = payload[0]?.payload?.label;
-    const d = chartData.find(r => r.label === label);
+    const d = payload[0]?.payload;
     if (!d) return null;
     const fmt = v => (typeof v === 'number' ? parseFloat(v.toFixed(4)).toString() : '-');
     return (
@@ -141,7 +125,26 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
         <YAxis domain={yDomain} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
 
-        <Customized component={(props) => <BoxPlotLayer {...props} data={chartData} />} />
+        <Bar
+          dataKey="_dummy"
+          isAnimationActive={false}
+          shape={(props) => (
+            <BoxShape
+              {...props}
+              min={props.min}
+              q1={props.q1}
+              median={props.median}
+              q3={props.q3}
+              max={props.max}
+              isSingle={props.isSingle}
+              yDomain={yDomain}
+            />
+          )}
+        >
+          {chartData.map((entry, index) => (
+            <Cell key={index} fill="transparent" />
+          ))}
+        </Bar>
 
         {targets.map((t, i) => (
           <ReferenceLine
