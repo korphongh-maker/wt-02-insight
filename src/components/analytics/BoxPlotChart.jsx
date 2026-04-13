@@ -124,7 +124,7 @@ export default function BoxPlotChart({ data, targets = [], unit = '', yDomain: y
     <ResponsiveContainer width="100%" height={300}>
       <ComposedChart data={chartData} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-        <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+        <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" angle={-30} textAnchor="end" height={50} />
         <YAxis domain={yDomain} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
 
