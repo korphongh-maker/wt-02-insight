@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import {
-  ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ResponsiveContainer
 } from 'recharts';
 
@@ -63,6 +63,7 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
         <YAxis domain={yDomain} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={45} />
         <Tooltip content={<CustomTooltip />} />
         
+        <Bar dataKey="value" fill="transparent" isAnimationActive={false} barSize={0} />
         <Line
           type="monotone"
           dataKey="value"
@@ -70,6 +71,7 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
           strokeWidth={2}
           dot={{ r: 3, fill: 'hsl(var(--primary))' }}
           activeDot={{ r: 5, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
+          connectNulls={false}
         />
 
         {targets.map((t, i) => (
