@@ -41,10 +41,10 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
         <div className="bg-card border border-border rounded-lg shadow-lg p-3 text-xs">
           <p className="font-semibold mb-1">{d.payload.label}</p>
           <p className="text-muted-foreground">
-            {valueLabel}: <span className="text-foreground font-medium">{d.value?.toFixed(2)} {unit}</span>
+            จำนวน: <span className="text-foreground font-medium">{count}</span>
           </p>
           <p className="text-muted-foreground">
-            จำนวน: <span className="text-foreground font-medium">{count}</span>
+            {valueLabel}: <span className="text-foreground font-medium">{d.value?.toFixed(2)} {unit}</span>
           </p>
         </div>
       );
