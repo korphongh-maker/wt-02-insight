@@ -50,6 +50,7 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
           angle={-30}
           textAnchor="end"
           height={50}
+          padding={{ left: 40, right: 40 }}
         />
         <YAxis domain={yDomain} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={45} />
         <Tooltip content={<CustomTooltip />} />
