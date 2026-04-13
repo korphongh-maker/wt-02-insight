@@ -4,7 +4,18 @@ import {
   ReferenceLine, ResponsiveContainer, Dot
 } from 'recharts';
 
-export default function LineChartWithTargets({ data, targets = [], unit = '' }) {
+export default function LineChartWithTargets({ data, targets = [], unit = '', yDomain: yDomainProp }) {
+
+  const yDomain = useMemo(() => {
+    if (yDomainProp) return yDomainProp;
+    const allVals = [...(data || []).map(d => d.value), ...targets];
+    if (allVals.length === 0) return [0, 1];
+    const minVal = Math.min(...allVals);
+    const maxVal = Math.max(...allVals);
+    const padding = (maxVal - minVal) * 0.15 || 1;
+    return [Math.floor(minVal - padding), Math.ceil(maxVal + padding)];
+  }, [data, targets, yDomainProp]);
+
   if (!data || data.length === 0) {
     return (
       <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
@@ -12,14 +23,6 @@ export default function LineChartWithTargets({ data, targets = [], unit = '' }) 
       </div>
     );
   }
-
-  const yDomain = useMemo(() => {
-    const allVals = [...data.map(d => d.value), ...targets];
-    const minVal = Math.min(...allVals);
-    const maxVal = Math.max(...allVals);
-    const padding = (maxVal - minVal) * 0.15 || 1;
-    return [Math.floor(minVal - padding), Math.ceil(maxVal + padding)];
-  }, [data, targets]);
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length > 0) {

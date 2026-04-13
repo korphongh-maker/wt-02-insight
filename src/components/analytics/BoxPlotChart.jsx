@@ -66,17 +66,12 @@ function BoxShape(props) {
   );
 }
 
-export default function BoxPlotChart({ data, targets = [], unit = '' }) {
-  if (!data || data.length === 0) {
-    return (
-      <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
-        ไม่มีข้อมูล
-      </div>
-    );
-  }
+export default function BoxPlotChart({ data, targets = [], unit = '', yDomain: yDomainProp }) {
 
   const yDomain = useMemo(() => {
-    const allVals = [...data.flatMap(d => [d.min, d.max]), ...targets];
+    if (yDomainProp) return yDomainProp;
+    const allVals = [...(data || []).flatMap(d => [d.min, d.max]), ...targets];
+    if (allVals.length === 0) return [0, 1];
     const minVal = Math.min(...allVals);
     const maxVal = Math.max(...allVals);
     const range = maxVal - minVal || Math.abs(maxVal) * 0.1 || 1;
@@ -85,7 +80,15 @@ export default function BoxPlotChart({ data, targets = [], unit = '' }) {
       parseFloat((minVal - padding).toFixed(6)),
       parseFloat((maxVal + padding).toFixed(6)),
     ];
-  }, [data, targets]);
+  }, [data, targets, yDomainProp]);
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
+        ไม่มีข้อมูล
+      </div>
+    );
+  }
 
   const chartData = data.map(d => ({
     label: d.label,
