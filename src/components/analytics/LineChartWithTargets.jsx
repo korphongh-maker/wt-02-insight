@@ -36,13 +36,15 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
     if (active && payload && payload.length > 0) {
       const d = payload[0];
       const count = d.payload.count || 1;
-      const label = count > 1 ? 'เฉลี่ย' : 'ค่า';
+      const valueLabel = count > 1 ? 'เฉลี่ย' : 'ค่า';
       return (
         <div className="bg-card border border-border rounded-lg shadow-lg p-3 text-xs">
           <p className="font-semibold mb-1">{d.payload.label}</p>
           <p className="text-muted-foreground">
-            {label}: <span className="text-foreground font-medium">{d.value?.toFixed(2)} {unit}</span>
-            {count > 1 && <span className="ml-1">({count} ค่า)</span>}
+            {valueLabel}: <span className="text-foreground font-medium">{d.value?.toFixed(2)} {unit}</span>
+          </p>
+          <p className="text-muted-foreground">
+            จำนวน: <span className="text-foreground font-medium">{count}</span>
           </p>
         </div>
       );
