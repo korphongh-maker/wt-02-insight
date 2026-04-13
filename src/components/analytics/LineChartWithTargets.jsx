@@ -4,19 +4,27 @@ import {
   ReferenceLine, ResponsiveContainer
 } from 'recharts';
 
-export default function LineChartWithTargets({ data, targets = [], unit = '', yDomain: yDomainProp }) {
+export default function LineChartWithTargets({ data, targets = [], unit = '', yDomain: yDomainProp, xLabels }) {
+
+  // Anchor data to xLabels from boxPlot so X-axis positions are identical
+  const alignedData = useMemo(() => {
+    if (!xLabels || xLabels.length === 0) return data;
+    const byLabel = {};
+    (data || []).forEach(d => { byLabel[d.label] = d; });
+    return xLabels.map(label => byLabel[label] || { label, value: null });
+  }, [data, xLabels]);
 
   const yDomain = useMemo(() => {
     if (yDomainProp) return yDomainProp;
-    const allVals = [...(data || []).map(d => d.value), ...targets];
+    const allVals = [...(alignedData || []).map(d => d.value).filter(v => v != null), ...targets];
     if (allVals.length === 0) return [0, 1];
     const minVal = Math.min(...allVals);
     const maxVal = Math.max(...allVals);
     const padding = (maxVal - minVal) * 0.15 || 1;
     return [Math.floor(minVal - padding), Math.ceil(maxVal + padding)];
-  }, [data, targets, yDomainProp]);
+  }, [alignedData, targets, yDomainProp]);
 
-  if (!data || data.length === 0) {
+  if (!alignedData || alignedData.length === 0) {
     return (
       <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
         ไม่มีข้อมูล
@@ -41,7 +49,7 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <ComposedChart data={data} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
+      <ComposedChart data={alignedData} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
         <XAxis 
           dataKey="label" 

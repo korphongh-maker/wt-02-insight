@@ -40,7 +40,7 @@ export default function ChartPair({ title, boxPlotData, lineData, targets, unit 
           <BoxPlotChart data={boxPlotData} targets={targets} unit={unit} yDomain={yDomain} />
         </TabsContent>
         <TabsContent value="line">
-          <LineChartWithTargets data={lineData} targets={targets} unit={unit} yDomain={yDomain} />
+          <LineChartWithTargets data={lineData} targets={targets} unit={unit} yDomain={yDomain} xLabels={boxPlotData.map(d => d.label)} />
         </TabsContent>
       </Tabs>
     </div>
