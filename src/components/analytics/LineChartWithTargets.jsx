@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ReferenceLine, ResponsiveContainer, Dot
+  ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ReferenceLine, ResponsiveContainer
 } from 'recharts';
 
 export default function LineChartWithTargets({ data, targets = [], unit = '', yDomain: yDomainProp }) {
@@ -41,7 +41,7 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
+      <ComposedChart data={data} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
         <XAxis 
           dataKey="label" 
@@ -79,7 +79,7 @@ export default function LineChartWithTargets({ data, targets = [], unit = '', yD
             }}
           />
         ))}
-      </LineChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 }
