@@ -78,6 +78,7 @@ export function groupDataForLine(data, dataKey, granularity) {
       .map(g => ({
         label: g.label,
         value: g.values.reduce((s, v) => s + v, 0) / g.values.length,
+        count: g.values.length,
         date: moment(g.sortKey + '-01-01').valueOf(),
       }));
   }
@@ -95,6 +96,7 @@ export function groupDataForLine(data, dataKey, granularity) {
       .map(g => ({
         label: g.label,
         value: g.values.reduce((s, v) => s + v, 0) / g.values.length,
+        count: g.values.length,
         date: moment(g.sortKey + '-01').valueOf(),
       }));
   }
@@ -112,6 +114,7 @@ export function groupDataForLine(data, dataKey, granularity) {
     .map(g => ({
       label: g.label,
       value: g.values.reduce((s, v) => s + v, 0) / g.values.length,
+      count: g.values.length,
       date: moment(g.sortKey).valueOf(),
     }));
 }
