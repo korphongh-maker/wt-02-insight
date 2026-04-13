@@ -98,19 +98,22 @@ export function groupDataForLine(data, dataKey, granularity) {
         date: moment(g.sortKey + '-01').valueOf(),
       }));
   }
-  // day view: each record as a point
-  return data
-    .map(row => {
-      const val = parseFloat(row[dataKey]);
-      if (isNaN(val)) return null;
-      return {
-        label: moment(row._day).format('DD/MM'),
-        value: val,
-        date: row._date?.valueOf() || 0,
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.date - b.date);
+  // day view: group by day, average multiple records
+  const dayGroups = {};
+  data.forEach(row => {
+    const val = parseFloat(row[dataKey]);
+    if (isNaN(val)) return;
+    const key = row._day;
+    if (!dayGroups[key]) dayGroups[key] = { label: moment(row._day).format('DD/MM'), values: [], sortKey: key };
+    dayGroups[key].values.push(val);
+  });
+  return Object.values(dayGroups)
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+    .map(g => ({
+      label: g.label,
+      value: g.values.reduce((s, v) => s + v, 0) / g.values.length,
+      date: moment(g.sortKey).valueOf(),
+    }));
 }
 
 function percentile(sorted, p) {
